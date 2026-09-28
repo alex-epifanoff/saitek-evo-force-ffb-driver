@@ -25,15 +25,20 @@ jobs:
       - name: Build, test and package
         shell: powershell
         run: ./tools/Invoke-CI.ps1 -Version '0.1.0-alpha.2' -Package
-      - name: Upload verified packages
+      - name: Prepare source-only CI artifacts
+        shell: powershell
+        run: |
+          $source='SaitekNativeFfb-0.1.0-alpha.2-source.zip'
+          Copy-Item -LiteralPath "out/release/0.1.0-alpha.2/$source" -Destination "out/ci/$source"
+          $lines=@($source,'verification-summary.json') | ForEach-Object { (Get-FileHash -LiteralPath "out/ci/$_" -Algorithm SHA256).Hash+'  '+$_ }
+          [IO.File]::WriteAllText((Join-Path $pwd 'out/ci/SHA256SUMS-source.txt'),($lines -join "`n")+"`n",[Text.UTF8Encoding]::new($false))
+      - name: Upload verified source and results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: windows-alpha-${{ github.sha }}
+          name: source-and-results-${{ github.sha }}
           path: |
-            out/release/0.1.0-alpha.2/SaitekNativeFfb-0.1.0-alpha.2-win-x64.zip
-            out/release/0.1.0-alpha.2/SaitekNativeFfb-0.1.0-alpha.2-source.zip
-            out/release/0.1.0-alpha.2/release-manifest.json
-            out/release/0.1.0-alpha.2/SHA256SUMS.txt
-            out/release/0.1.0-alpha.2/verification-summary.json
+            out/ci/SaitekNativeFfb-0.1.0-alpha.2-source.zip
+            out/ci/SHA256SUMS-source.txt
+            out/ci/verification-summary.json
           if-no-files-found: error
           retention-days: 14

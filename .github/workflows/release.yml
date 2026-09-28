@@ -41,8 +41,10 @@ jobs:
     needs: validate
     runs-on: windows-2022
     timeout-minutes: 20
-    outputs:
-      commit: ${{ steps.identity.outputs.commit }}
+    # Tag builds attach binaries directly to a private draft. Passing them
+    # through Actions artifacts would expose them before release review.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -60,42 +62,21 @@ jobs:
         env:
           RELEASE_VERSION: ${{ needs.validate.outputs.version }}
         run: ./tools/Invoke-CI.ps1 -Version $env:RELEASE_VERSION -Package
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: release-assets
-          path: |
-            out/release/${{ needs.validate.outputs.version }}/SaitekNativeFfb-${{ needs.validate.outputs.version }}-win-x64.zip
-            out/release/${{ needs.validate.outputs.version }}/SaitekNativeFfb-${{ needs.validate.outputs.version }}-source.zip
-            out/release/${{ needs.validate.outputs.version }}/release-manifest.json
-            out/release/${{ needs.validate.outputs.version }}/SHA256SUMS.txt
-            out/release/${{ needs.validate.outputs.version }}/verification-summary.json
-          if-no-files-found: error
-          retention-days: 14
-  draft:
-    needs: [validate, build]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions:
-      contents: write
-    env:
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
-      TAG: ${{ needs.validate.outputs.tag }}
-      VERSION: ${{ needs.validate.outputs.version }}
-      COMMIT: ${{ needs.build.outputs.commit }}
-    steps:
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: release-assets
-          path: assets
       - name: Verify assets and tag identity
         shell: bash
+        working-directory: out/release/${{ needs.validate.outputs.version }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.validate.outputs.tag }}
+          VERSION: ${{ needs.validate.outputs.version }}
+          COMMIT: ${{ steps.identity.outputs.commit }}
         run: |
           set -euo pipefail
           test "$(gh api "repos/$GH_REPO/commits/$TAG" --jq .sha)" = "$COMMIT"
-          python3 - <<'PY'
+          python - <<'PY'
           import hashlib, json, os, pathlib, re
-          root = pathlib.Path('assets')
+          root = pathlib.Path('.')
           version, commit = os.environ['VERSION'], os.environ['COMMIT']
           files = {f'SaitekNativeFfb-{version}-win-x64.zip', f'SaitekNativeFfb-{version}-source.zip', 'release-manifest.json', 'verification-summary.json'}
           assert {p.name for p in root.iterdir()} == files | {'SHA256SUMS.txt'}, 'Unexpected release assets'
@@ -118,6 +99,13 @@ jobs:
           PY
       - name: Create or refresh draft prerelease
         shell: bash
+        working-directory: out/release/${{ needs.validate.outputs.version }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.validate.outputs.tag }}
+          VERSION: ${{ needs.validate.outputs.version }}
+          COMMIT: ${{ steps.identity.outputs.commit }}
         run: |
           set -euo pipefail
           cat > notes.md <<'NOTES'
@@ -133,14 +121,14 @@ jobs:
           NOTES
           printf '\nSource commit: `%s`\n' "$COMMIT" >> notes.md
           if gh release view "$TAG" --json isDraft,targetCommitish > existing.json 2>/dev/null; then
-            python3 - <<'PY'
+            python - <<'PY'
           import json, os
           release = json.load(open('existing.json'))
           assert release['isDraft'] is True, 'Refusing to modify an already published release'
           assert release['targetCommitish'] == os.environ['COMMIT'], 'Draft source identity differs'
           PY
-            gh release upload "$TAG" assets/* --clobber
+            gh release upload "$TAG" "SaitekNativeFfb-$VERSION-win-x64.zip" "SaitekNativeFfb-$VERSION-source.zip" release-manifest.json SHA256SUMS.txt verification-summary.json --clobber
             gh release edit "$TAG" --draft --prerelease --notes-file notes.md
           else
-            gh release create "$TAG" assets/* --verify-tag --target "$COMMIT" --draft --prerelease --title "Saitek Evo Force $TAG" --notes-file notes.md
+            gh release create "$TAG" "SaitekNativeFfb-$VERSION-win-x64.zip" "SaitekNativeFfb-$VERSION-source.zip" release-manifest.json SHA256SUMS.txt verification-summary.json --verify-tag --target "$COMMIT" --draft --prerelease --title "Saitek Evo Force $TAG" --notes-file notes.md
           fi
