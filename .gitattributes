@@ -1,0 +1,2 @@
+# Preserve exact source bytes across Windows and Linux checkouts for manifests.
+* -text

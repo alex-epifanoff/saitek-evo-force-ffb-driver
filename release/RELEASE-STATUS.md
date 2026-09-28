@@ -1,0 +1,15 @@
+# Release status: 0.1.0-alpha.2
+
+**Unsigned experimental alpha.** The supported scope is the exact Saitek Cyborg Evo Force USB `06A3:FFB5`, validated descriptor, x64 Windows DirectInput fingerprint and separate Bridge/runtime combination listed in README. This is not a claim of general device or Windows compatibility.
+
+The package provides driver source/binary, compiler-free per-user installation, saved-state Restore, an optional launcher/shortcut, passive redacted support and user documentation. No app launch, device access or Arm is part of the setup menu. Support reports hardware as `NotChecked`.
+
+The owner reports that FFB works in X-Plane 12 on their setup. The precise artifact and individual effects behind that report have not been established. Earlier observations support noticeable centering with ordinary input; reported 70/70 pitch/roll and later 40 vibration values are historical observations, not defaults or recommended strengths. Validation of this extracted package, individual periodic effects, useful texture, unplug/replug recovery and a second PC remain open. Offline suites and manifest validation do not establish these physical outcomes.
+
+The [release workflow](https://github.com/alex-epifanoff/saitek-evo-force-ffb-driver/actions/workflows/release.yml) builds alpha tags matching `vX.Y.Z-alpha.N` and creates a **draft prerelease** with Actions-built archives, manifest, checksums and a verification summary. A maintainer reviews the run, its explicit installer-suite skips, the packaged notices and remaining pilot/redistribution checks before publishing it on [Releases](https://github.com/alex-epifanoff/saitek-evo-force-ffb-driver/releases). Draft creation alone is not publication or acceptance. See the source repository's [build and release guide](https://github.com/alex-epifanoff/saitek-evo-force-ffb-driver/blob/main/docs/build-release.md).
+
+The project uses the MIT License, copyright 2026 Alex Epifanov; see the root `LICENSE`. Third-party materials retain their own terms. Provenance and third-party review, including static MSVC `/MT` runtime redistribution terms, remain open before maintainer publication. The package is unsigned and has no authenticated publisher signature. Those facts must remain visible in a public prerelease; automated checks do not settle provenance, third-party redistribution or physical acceptance.
+
+The manifest and external SHA-256 checksums identify bytes and detect accidental change. An attacker able to replace the payload and manifest can replace both; unsigned hashes do not authenticate a publisher. There is no automatic updater, telemetry or upload. Obtain prerequisites separately through official channels.
+
+Install enforces the exact software identities. Restore uses its saved transaction independently of the current source/manifest and DirectInput fingerprint. Upgrade by restoring the old transaction before applying the new complete package. Restore requires exactly one active transaction; an explicit backup ID does not bypass that guard. Keep saved backups private and do not edit them.

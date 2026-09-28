@@ -1,0 +1,146 @@
+name: Draft alpha release
+
+on:
+  push:
+    tags: ['v*.*.*-alpha.*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing alpha tag (for example v0.1.0-alpha.2)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Validate requested tag
+        id: version
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ${#TAG} -gt 101 || ! "$TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)-alpha\.(0|[1-9][0-9]*)$ ]]; then
+            echo 'Expected an existing vX.Y.Z-alpha.N tag.' >&2
+            exit 1
+          fi
+          printf 'tag=%s\nversion=%s\n' "$TAG" "${TAG#v}" >> "$GITHUB_OUTPUT"
+  build:
+    needs: validate
+    runs-on: windows-2022
+    timeout-minutes: 20
+    outputs:
+      commit: ${{ steps.identity.outputs.commit }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ needs.validate.outputs.tag }}
+          persist-credentials: false
+      - name: Record exact source commit
+        id: identity
+        shell: powershell
+        run: |
+          $commit = git rev-parse HEAD
+          if ($LASTEXITCODE -ne 0 -or $commit -cnotmatch '^[a-f0-9]{40}$') { throw 'Invalid source commit.' }
+          "commit=$commit" >> $env:GITHUB_OUTPUT
+      - name: Build, test and package tagged source
+        shell: powershell
+        env:
+          RELEASE_VERSION: ${{ needs.validate.outputs.version }}
+        run: ./tools/Invoke-CI.ps1 -Version $env:RELEASE_VERSION -Package
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-assets
+          path: |
+            out/release/${{ needs.validate.outputs.version }}/SaitekNativeFfb-${{ needs.validate.outputs.version }}-win-x64.zip
+            out/release/${{ needs.validate.outputs.version }}/SaitekNativeFfb-${{ needs.validate.outputs.version }}-source.zip
+            out/release/${{ needs.validate.outputs.version }}/release-manifest.json
+            out/release/${{ needs.validate.outputs.version }}/SHA256SUMS.txt
+            out/release/${{ needs.validate.outputs.version }}/verification-summary.json
+          if-no-files-found: error
+          retention-days: 14
+  draft:
+    needs: [validate, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TAG: ${{ needs.validate.outputs.tag }}
+      VERSION: ${{ needs.validate.outputs.version }}
+      COMMIT: ${{ needs.build.outputs.commit }}
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-assets
+          path: assets
+      - name: Verify assets and tag identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GH_REPO/commits/$TAG" --jq .sha)" = "$COMMIT"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re
+          root = pathlib.Path('assets')
+          version, commit = os.environ['VERSION'], os.environ['COMMIT']
+          files = {f'SaitekNativeFfb-{version}-win-x64.zip', f'SaitekNativeFfb-{version}-source.zip', 'release-manifest.json', 'verification-summary.json'}
+          assert {p.name for p in root.iterdir()} == files | {'SHA256SUMS.txt'}, 'Unexpected release assets'
+          seen = set()
+          for line in (root / 'SHA256SUMS.txt').read_text().splitlines():
+              match = re.fullmatch(r'([A-F0-9]{64})  ([A-Za-z0-9._-]+)', line)
+              assert match, 'Invalid checksum record'
+              digest, name = match.groups()
+              assert name in files and name not in seen, 'Unexpected or duplicate checksum'
+              assert hashlib.sha256((root / name).read_bytes()).hexdigest().upper() == digest, 'Checksum mismatch'
+              seen.add(name)
+          assert seen == files, 'Missing checksums'
+          manifest = json.loads((root / 'release-manifest.json').read_text())
+          summary = json.loads((root / 'verification-summary.json').read_text())
+          assert manifest['SourceIdentity']['GitCommit'] == commit and manifest['SourceIdentity']['Dirty'] is False
+          assert manifest['Version'] == version and manifest['Channel'] == 'experimental-alpha'
+          assert summary['GitCommit'] == commit and summary['Version'] == version and summary['Result'] == 'PASS'
+          assert summary['HardwareTested'] is False
+          assert all(c['Status'] in ('PASS', 'SKIP') for c in summary['Checks'])
+          PY
+      - name: Create or refresh draft prerelease
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > notes.md <<'NOTES'
+          Experimental, unsigned Windows x64 driver for Saitek Cyborg Evo Force (USB 06A3:FFB5).
+
+          Download the **win-x64.zip** for setup or **source.zip** for the complete build inputs. FFB-Bridge and X-Plane must be obtained separately.
+
+          Offline CI checks are recorded in verification-summary.json. Installer fixture suites may be explicitly skipped on hosted runners with a different DirectInput fingerprint. CI does not test physical feedback, installation on an owner's PC, or compatibility with arbitrary Windows/Bridge versions.
+
+          The installer retains its strict compatibility checks. Read README.md, RELEASE-STATUS.md and THIRD-PARTY-NOTICES.md in the package before installation. Hashes establish integrity, not publisher identity; binaries are not Authenticode signed.
+
+          Maintainer: review pilot and binary redistribution requirements before publishing this draft. The original author has reported working FFB in X-Plane 12; independent-PC and exact-release hardware validation remain open.
+          NOTES
+          printf '\nSource commit: `%s`\n' "$COMMIT" >> notes.md
+          if gh release view "$TAG" --json isDraft,targetCommitish > existing.json 2>/dev/null; then
+            python3 - <<'PY'
+          import json, os
+          release = json.load(open('existing.json'))
+          assert release['isDraft'] is True, 'Refusing to modify an already published release'
+          assert release['targetCommitish'] == os.environ['COMMIT'], 'Draft source identity differs'
+          PY
+            gh release upload "$TAG" assets/* --clobber
+            gh release edit "$TAG" --draft --prerelease --notes-file notes.md
+          else
+            gh release create "$TAG" assets/* --verify-tag --target "$COMMIT" --draft --prerelease --title "Saitek Evo Force $TAG" --notes-file notes.md
+          fi

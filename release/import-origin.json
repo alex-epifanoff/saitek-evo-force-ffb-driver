@@ -1,0 +1,170 @@
+{
+    "SchemaVersion":  1,
+    "SourceIdentity":  {
+                           "GitCommit":  "007dbcb9eb60d0c07c464119b70e3b8493037438",
+                           "Dirty":  false,
+                           "InventorySha256":  "FCCA2BBE72970C6F0F428BB1E88E99A5AE3E6000C5D0898E4EDFB1DEE1C6D0A3"
+                       },
+    "Files":  [
+                  {
+                      "Path":  ".gitignore",
+                      "Length":  43,
+                      "Sha256":  "96485AE7851A8425FC4AC209CF3FD16E04FAB107F4E7552176332EEAA2BDFD0C"
+                  },
+                  {
+                      "Path":  "Start.cmd",
+                      "Length":  184,
+                      "Sha256":  "79E3B3BE6A9CF9563433167ACC612715F0147202E434727557511CBACBAF9627"
+                  },
+                  {
+                      "Path":  "README.md",
+                      "Length":  4149,
+                      "Sha256":  "891558192390D6FF3F0ADBCEF95F16789D0F1282EE2C6D4012ADE902D54B452A"
+                  },
+                  {
+                      "Path":  "native/SaitekFfbDriver.cpp",
+                      "Length":  26665,
+                      "Sha256":  "7EA51DD3F9093D0D37B803EB994D7E522FF6E2EED25E4D41CD5551B8CC0ED08C"
+                  },
+                  {
+                      "Path":  "native/SaitekFfbDriver.def",
+                      "Length":  90,
+                      "Sha256":  "E61276CA3EF32D01655770058994A6A9146091A3B440DE33DE78A170393342F6"
+                  },
+                  {
+                      "Path":  "native/HidPidDevice.cpp",
+                      "Length":  31285,
+                      "Sha256":  "D23F7B1B8D2C5259DFCF139EC61C2C32C7A2757B02C86A9695E3A84E0F2009FF"
+                  },
+                  {
+                      "Path":  "native/HidPidDevice.h",
+                      "Length":  3944,
+                      "Sha256":  "E2D437257FE6520B64A9C579B9C7A8D6D82F9491D230B9C77C18035DF5D73481"
+                  },
+                  {
+                      "Path":  "native/tests/DriverTests.cpp",
+                      "Length":  17056,
+                      "Sha256":  "6115DE0C55C39BF104E36E4C6E9142408101EA414B0A2497F2069046639921B9"
+                  },
+                  {
+                      "Path":  "tools/Build-Driver.ps1",
+                      "Length":  6713,
+                      "Sha256":  "5CADDA660541433A32EF606C302B5172E54E8AA670EFA224075B03E98F24E927"
+                  },
+                  {
+                      "Path":  "tools/Build-Release.ps1",
+                      "Length":  18699,
+                      "Sha256":  "89A75780C20E5F193E1ACECF6CEE58F34788DC7F61E3FD9BF97DD637647D25CC"
+                  },
+                  {
+                      "Path":  "tools/Install-SaitekFfbDriver.ps1",
+                      "Length":  29867,
+                      "Sha256":  "93EF2FB5F572522EB6BDA161789202345DA52F9F5061028F34E32AD55055C039"
+                  },
+                  {
+                      "Path":  "tools/SaitekFfb.Common.ps1",
+                      "Length":  8746,
+                      "Sha256":  "E9FBF2C3236A380762CDB52C9C4EE5A8D2F2ADDB9B05261D1A9374A8483E6C8B"
+                  },
+                  {
+                      "Path":  "tools/Start-SaitekFfbSetup.ps1",
+                      "Length":  6643,
+                      "Sha256":  "739FA626894176CDF820B269EF7BC9CA7A350700F616E2C0C5D76722F1B3143B"
+                  },
+                  {
+                      "Path":  "tools/Start-SaitekFfbBridge.ps1",
+                      "Length":  5111,
+                      "Sha256":  "6F0416F811C4063E82876BFD40FCAB586547A63A8C7A3ECC91848EFBA03BDFFF"
+                  },
+                  {
+                      "Path":  "tools/Get-SaitekFfbSupport.ps1",
+                      "Length":  10364,
+                      "Sha256":  "662D2758B8467A6017658D4A20E79208ABFBAFC473B4D32DB0161DA680FCAB94"
+                  },
+                  {
+                      "Path":  "tools/New-SaitekFfbShortcut.ps1",
+                      "Length":  2596,
+                      "Sha256":  "0FF0D62F0B9D4BC0A4B12EEF55E8D87688F882B427BF7046A6D001049F70741D"
+                  },
+                  {
+                      "Path":  "tests/Run-HidPidTests.ps1",
+                      "Length":  1347,
+                      "Sha256":  "D724530D83CAE75397AC78D038610B3D0C301495509209A4C7C5E4C5C71C2ECF"
+                  },
+                  {
+                      "Path":  "tests/HidPidDeviceTests.cpp",
+                      "Length":  18257,
+                      "Sha256":  "9459BF3D113E6FC90634CDCE855EEF895F7536531483544CA6C14BED26F40B0A"
+                  },
+                  {
+                      "Path":  "tests/Install-SaitekFfbDriver.Tests.ps1",
+                      "Length":  10469,
+                      "Sha256":  "B404B77525B12738C5270A9E6C49A2407FDEA0D1377B7062BE9F63684220FCC1"
+                  },
+                  {
+                      "Path":  "tests/Release-Installer.Tests.ps1",
+                      "Length":  21048,
+                      "Sha256":  "D3EDDAC68FFE54013A0FF0A240B1526BC9CFF4453FDB91EA81076AC5440BE01E"
+                  },
+                  {
+                      "Path":  "tests/Release-Package.Tests.ps1",
+                      "Length":  14634,
+                      "Sha256":  "3C8ADBCD134A191A542EA2B6744891E9EFD24BF308F473D38A02B19EA2F3116D"
+                  },
+                  {
+                      "Path":  "tests/Owner-Tools.Tests.ps1",
+                      "Length":  21785,
+                      "Sha256":  "FA36576B83B63BFAAC179BE25C4D23DA2E8BF794B721BA80749F5A22EB6B638F"
+                  },
+                  {
+                      "Path":  "docs/community-alpha.md",
+                      "Length":  2384,
+                      "Sha256":  "F63DAD0DD2575F5BA322EF24E8D50CA69B6D634C2BC0BF5A4948E927D6654FC7"
+                  },
+                  {
+                      "Path":  "docs/bridge-launcher.md",
+                      "Length":  2715,
+                      "Sha256":  "DE60AE4341E7AAE585B7C552272EAC73F2889C39E892C3DB46E67C73FE724E28"
+                  },
+                  {
+                      "Path":  "docs/flying.md",
+                      "Length":  2756,
+                      "Sha256":  "7DD13B883ABAE564CB5BD605686D4C3DB8BD680DAC5EC892E386EC428CF4C5B8"
+                  },
+                  {
+                      "Path":  "docs/native-install.md",
+                      "Length":  4558,
+                      "Sha256":  "260D8A201E9477A041478B1C66C92A1326CAEF6AA712A444047990AAD4FA9CF6"
+                  },
+                  {
+                      "Path":  "docs/native-driver.md",
+                      "Length":  5008,
+                      "Sha256":  "448F6AD28BC8F39C8F73ECADF26966E1174E0E4422821D6A8FAE8C05EE45E005"
+                  },
+                  {
+                      "Path":  "docs/protocol.md",
+                      "Length":  6463,
+                      "Sha256":  "D41989F9D40FFF43E6BE16C3FFC6A4494C875FD30110FA70B3DF91C1D64EB250"
+                  },
+                  {
+                      "Path":  "release/release-spec.json",
+                      "Length":  4228,
+                      "Sha256":  "7CDBBA656D97D3E4672D191F6E8ED905C76F7A998697DBB82F23FA3BD285B9FC"
+                  },
+                  {
+                      "Path":  "release/PROVENANCE.md",
+                      "Length":  2748,
+                      "Sha256":  "E663FDFC1395A472F243FE984B399FAB3B6831178F53F23D26D5F582654E6D47"
+                  },
+                  {
+                      "Path":  "release/RELEASE-STATUS.md",
+                      "Length":  1953,
+                      "Sha256":  "8453108E2EB03454E75E6FEF30B3059E65FF44C7F7EA14B1AA0954FF535FCCBB"
+                  },
+                  {
+                      "Path":  "release/THIRD-PARTY-NOTICES.md",
+                      "Length":  2427,
+                      "Sha256":  "CAEB14782DA324FF51AF4FE5B7724AE5EDA4CF276F66561D44D77B2E5F1B6414"
+                  }
+              ]
+}

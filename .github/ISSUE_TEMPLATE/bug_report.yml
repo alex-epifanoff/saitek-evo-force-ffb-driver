@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a driver, setup, or feedback problem.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Include only redacted diagnostics you have reviewed. Do not upload private logs, full support bundles, license keys, or another product's binaries.
+  - type: input
+    id: version
+    attributes:
+      label: Release tag or source commit
+      placeholder: v0.1.0-alpha.2
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Joystick model and USB VID/PID
+      placeholder: Saitek Cyborg Evo Force, 06A3:FFB5
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Windows version/build, FFB-Bridge version, simulator and aircraft.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: What happened?
+      description: Steps, expected behavior, actual behavior and whether joystick input still works.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Reviewed redacted support output
+      description: Optional JSON from Start.cmd → Collect support. Review it before sharing.
+      render: json

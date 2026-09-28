@@ -1,0 +1,4 @@
+LIBRARY SaitekFfbDriver
+EXPORTS
+    DllGetClassObject PRIVATE
+    DllCanUnloadNow PRIVATE
