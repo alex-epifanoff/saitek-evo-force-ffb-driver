@@ -54,7 +54,7 @@ jobs:
         run: |
           $commit = git rev-parse HEAD
           if ($LASTEXITCODE -ne 0 -or $commit -cnotmatch '^[a-f0-9]{40}$') { throw 'Invalid source commit.' }
-          "commit=$commit" >> $env:GITHUB_OUTPUT
+          [IO.File]::AppendAllText($env:GITHUB_OUTPUT,"commit=$commit`n",[Text.UTF8Encoding]::new($false))
       - name: Build, test and package tagged source
         shell: powershell
         env:
